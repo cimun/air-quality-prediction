@@ -9,6 +9,8 @@ import re
 from pathlib import Path
 from datetime import datetime, timedelta
 
+from numpy import double
+
 warnings.filterwarnings("ignore", module="IPython")
 
 # ---------- Paths / PYTHONPATH ----------
@@ -84,19 +86,42 @@ def run_inference_for_sensor(city: str, street: str) -> None:
 
     # ----- Load weather data -----
     weather_fg = fs.get_feature_group(name=f"weather_{street_slug}", version=1)
+    aq_fg = fs.get_feature_group(name=f"air_quality_{street_slug}", version=1)
+    aq_df = aq_fg.read()
     batch_df = weather_fg.filter(weather_fg.date >= today).read()
+    batch_df = batch_df.sort_values("date")
 
-    # Predict PM2.5
-    batch_df["predicted_pm25"] = xgb_model.predict(
-        batch_df[
-            [
-                "temperature_2m_mean",
-                "precipitation_sum",
-                "wind_speed_10m_max",
-                "wind_direction_10m_dominant",
-            ]
+    lag_1 = aq_df.loc[aq_df["date"].dt.date == today.date(), "pm25"].iloc[0]
+    lag_2 = aq_df.loc[aq_df["date"].dt.date == (today - timedelta(days=1)).date(), "pm25"].iloc[0]
+    lag_3 = aq_df.loc[aq_df["date"].dt.date == (today - timedelta(days=2)).date(), "pm25"].iloc[0]
+
+    batch_df["predicted_pm25"] = 0.0
+    batch_df["predicted_pm25"] = batch_df["predicted_pm25"].astype(double)
+    batch_df["pm25_lag_1"] = float(0.0)
+    batch_df["pm25_lag_2"] = float(0.0)
+    batch_df["pm25_lag_3"] = float(0.0)
+
+    for idx, row in batch_df.iterrows():
+        print(f"Predicting for {row['date'].date()} with lags: {lag_1}, {lag_2}, {lag_3}")
+        batch_df.at[idx, "pm25_lag_1"] = lag_1
+        batch_df.at[idx, "pm25_lag_2"] = lag_2
+        batch_df.at[idx, "pm25_lag_3"] = lag_3
+        features = [
+            lag_1,
+            lag_2,
+            lag_3,
+            float(row.get("temperature_2m_mean")),
+            float(row.get("precipitation_sum")),
+            float(row.get("wind_speed_10m_max")),
+            float(row.get("wind_direction_10m_dominant")),
         ]
-    )
+        pred = xgb_model.predict([features])[0]
+        # Set lag columns for the current row (the values used for this prediction)
+        batch_df.at[idx, "predicted_pm25"] = pred
+        # Shift lags for the next prediction
+        lag_2, lag_3 = lag_1, lag_2
+        lag_1 = pred
+
     batch_df["street"] = street
     batch_df["city"] = city
     batch_df["country"] = batch_df.get("country", city)
