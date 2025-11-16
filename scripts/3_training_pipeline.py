@@ -73,7 +73,7 @@ def train_one_sensor(city: str, street: str) -> None:
     )
 
     # ---- start split for test data
-    start_date_test_data = "2025-10-01"
+    start_date_test_data = "2025-05-01"
     # Convert string to datetime object
     test_start = datetime.strptime(start_date_test_data, "%Y-%m-%d")
     
