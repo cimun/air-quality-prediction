@@ -114,6 +114,10 @@ def run_inference_for_sensor(city: str, street: str) -> None:
             float(row.get("precipitation_sum")),
             float(row.get("wind_speed_10m_max")),
             float(row.get("wind_direction_10m_dominant")),
+            float(row.get("surface_pressure_mean")),
+            float(row.get("relative_humidity_2m_mean")),
+            float(row.get("cloud_cover_mean")),
+            float(row.get("visibility_mean")),
         ]
         pred = xgb_model.predict([features])[0]
         # Set lag columns for the current row (the values used for this prediction)

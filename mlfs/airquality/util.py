@@ -33,7 +33,8 @@ def get_historical_weather(city, start_date,  end_date, latitude, longitude):
         "longitude": longitude,
         "start_date": start_date,
         "end_date": end_date,
-        "daily": ["temperature_2m_mean", "precipitation_sum", "wind_speed_10m_max", "wind_direction_10m_dominant"]
+        "daily": ["temperature_2m_mean", "precipitation_sum", "wind_speed_10m_max", "wind_direction_10m_dominant",
+                  "surface_pressure_mean", "relative_humidity_2m_mean", "cloud_cover_mean", "visibility_mean"]
     }
     responses = openmeteo.weather_api(url, params=params)
 
@@ -50,6 +51,10 @@ def get_historical_weather(city, start_date,  end_date, latitude, longitude):
     daily_precipitation_sum = daily.Variables(1).ValuesAsNumpy()
     daily_wind_speed_10m_max = daily.Variables(2).ValuesAsNumpy()
     daily_wind_direction_10m_dominant = daily.Variables(3).ValuesAsNumpy()
+    daily_surface_pressure_mean = daily.Variables(4).ValuesAsNumpy()
+    daily_relative_humidity_2m_mean = daily.Variables(5).ValuesAsNumpy()
+    daily_cloud_cover_mean = daily.Variables(6).ValuesAsNumpy()
+    daily_visibility_mean = daily.Variables(7).ValuesAsNumpy()
 
     daily_data = {"date": pd.date_range(
         start = pd.to_datetime(daily.Time(), unit = "s"),
@@ -61,6 +66,10 @@ def get_historical_weather(city, start_date,  end_date, latitude, longitude):
     daily_data["precipitation_sum"] = daily_precipitation_sum
     daily_data["wind_speed_10m_max"] = daily_wind_speed_10m_max
     daily_data["wind_direction_10m_dominant"] = daily_wind_direction_10m_dominant
+    daily_data["surface_pressure_mean"] = daily_surface_pressure_mean
+    daily_data["relative_humidity_2m_mean"] = daily_relative_humidity_2m_mean
+    daily_data["cloud_cover_mean"] = daily_cloud_cover_mean
+    daily_data["visibility_mean"] = daily_visibility_mean
 
     daily_dataframe = pd.DataFrame(data = daily_data)
     daily_dataframe = daily_dataframe.dropna()
@@ -82,7 +91,8 @@ def get_hourly_weather_forecast(city, latitude, longitude):
     params = {
         "latitude": latitude,
         "longitude": longitude,
-        "hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m"]
+        "hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m", "surface_pressure",
+                   "relative_humidity_2m", "cloud_cover", "visibility"]
     }
     responses = openmeteo.weather_api(url, params=params)
 
@@ -100,6 +110,10 @@ def get_hourly_weather_forecast(city, latitude, longitude):
     hourly_precipitation = hourly.Variables(1).ValuesAsNumpy()
     hourly_wind_speed_10m = hourly.Variables(2).ValuesAsNumpy()
     hourly_wind_direction_10m = hourly.Variables(3).ValuesAsNumpy()
+    hourly_surface_pressure = hourly.Variables(4).ValuesAsNumpy()
+    hourly_relative_humidity_2m = hourly.Variables(5).ValuesAsNumpy()
+    hourly_cloud_cover = hourly.Variables(6).ValuesAsNumpy()
+    hourly_visibility = hourly.Variables(7).ValuesAsNumpy()
 
     hourly_data = {"date": pd.date_range(
         start = pd.to_datetime(hourly.Time(), unit = "s"),
@@ -111,6 +125,10 @@ def get_hourly_weather_forecast(city, latitude, longitude):
     hourly_data["precipitation_sum"] = hourly_precipitation
     hourly_data["wind_speed_10m_max"] = hourly_wind_speed_10m
     hourly_data["wind_direction_10m_dominant"] = hourly_wind_direction_10m
+    hourly_data["surface_pressure_mean"] = hourly_surface_pressure
+    hourly_data["relative_humidity_2m_mean"] = hourly_relative_humidity_2m
+    hourly_data["cloud_cover_mean"] = hourly_cloud_cover
+    hourly_data["visibility_mean"] = hourly_visibility
 
     hourly_dataframe = pd.DataFrame(data = hourly_data)
     hourly_dataframe = hourly_dataframe.dropna()
