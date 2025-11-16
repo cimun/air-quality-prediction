@@ -82,6 +82,16 @@ def process_sensor(row: pd.Series, aq_api_key: str, today: date) -> None:
     aq_today_df["street"] = street
     aq_today_df["url"] = aqicn_url
 
+    # Compute lag features from existing FG if present
+    aq_fg_name = f"air_quality_{street_slug}"
+    aq_fg = fs.get_feature_group(name=aq_fg_name, version=1)
+    existing_df = aq_fg.read()
+    existing_df["date"] = pd.to_datetime(existing_df["date"])
+
+    aq_today_df["pm25_lag_1"] = existing_df.loc[existing_df["date"].dt.date == (today - pd.Timedelta(days=1)), "pm25"].iloc[0]
+    aq_today_df["pm25_lag_2"] = existing_df.loc[existing_df["date"].dt.date == (today - pd.Timedelta(days=2)), "pm25"].iloc[0]
+    aq_today_df["pm25_lag_3"] = existing_df.loc[existing_df["date"].dt.date == (today - pd.Timedelta(days=3)), "pm25"].iloc[0]
+
     # Retrieve daily weather (sample around noon)
     print("get hourly weather called")
     hourly_df = util.get_hourly_weather_forecast(city, latitude, longitude).set_index("date")

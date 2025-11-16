@@ -102,11 +102,19 @@ def process_sensor(row: pd.Series, aq_api_key: str, today: date) -> None:
 
     df_aq = df[["date", "pm25"]].copy()
     df_aq["pm25"] = df_aq["pm25"].astype("float32")
-    df_aq.dropna(inplace=True)
     df_aq["country"] = country
     df_aq["city"] = city
     df_aq["street"] = street
     df_aq["url"] = aqicn_url
+
+    # Compute lag features for historical data (1,2,3 days)
+    df_aq["date"] = pd.to_datetime(df_aq["date"])
+    df_aq = df_aq.sort_values(by=["country", "city", "street", "date"])
+    grouped = df_aq.groupby(["country", "city", "street"])
+    df_aq["pm25_lag_1"] = grouped["pm25"].shift(1)
+    df_aq["pm25_lag_2"] = grouped["pm25"].shift(2)
+    df_aq["pm25_lag_3"] = grouped["pm25"].shift(3)
+    df_aq.dropna(inplace=True)
 
     # Historical weather (from earliest AQ date to today)
     earliest_aq_date = pd.Series.min(df_aq["date"]).strftime("%Y-%m-%d")
@@ -145,6 +153,9 @@ def process_sensor(row: pd.Series, aq_api_key: str, today: date) -> None:
     )
 
     df_aq["pm25"] = df_aq["pm25"].astype(np.double)
+    df_aq["pm25_lag_1"] = df_aq["pm25_lag_1"].astype(np.double)
+    df_aq["pm25_lag_2"] = df_aq["pm25_lag_2"].astype(np.double)
+    df_aq["pm25_lag_3"] = df_aq["pm25_lag_3"].astype(np.double)
     air_quality_fg.insert(df_aq)
     #air_quality_fg.update_feature_description("date", "Date of measurement of air quality")
     #air_quality_fg.update_feature_description("country", "Country (sometimes a city in aqicn.org)")

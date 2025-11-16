@@ -1,5 +1,9 @@
+import os
+import re
+from pathlib import Path
 import hopsworks
 import sys
+import pandas as pd
 
 files_to_clean=""
 if len(sys.argv) != 2:
@@ -17,6 +21,12 @@ fs = project.get_feature_store()
 ms = project.get_model_serving()
 mr = project.get_model_registry()
 kafka_api = project.get_kafka_api()
+
+def slugify(text: str) -> str:
+    text = text.strip().lower()
+    text = re.sub(r"[^\w\s-]", "", text)
+    text = re.sub(r"[\s-]+", "_", text)
+    return text
 
 def delete_deployment(deployment_name):
     try:
@@ -146,16 +156,39 @@ if files_to_clean == "cc":
 
 
 elif files_to_clean == "aq":
-    delete_model("air_quality_xgboost_model")    
-    delete_feature_view("air_quality_fv")
-    for feature_group in [
-        "air_quality",
-        "weather",
-        "air_quality_fv_1_logging_transformed",
-        "air_quality_fv_1_logging_untransformed",
-        "aq_predictions"
-    ]:
-        delete_feature_group(feature_group)
+    root_dir = Path().absolute()
+    if root_dir.parts[-1:] == ("airquality",):
+        root_dir = Path(*root_dir.parts[:-1])
+
+    sensors_csv = os.environ.get("SENSORS_CSV", str(root_dir / "data" / "sensors.csv"))
+
+    # Expected columns: AQICN_URL,country,city,street,latitude,longitude
+    if not Path(sensors_csv).exists():
+        print(f"Missing sensors CSV: {sensors_csv}")
+        sys.exit(1)
+
+    sensors_df = pd.read_csv(sensors_csv, dtype=str).fillna("")
+    required_cols = {"AQICN_URL", "country", "city", "street", "latitude", "longitude"}
+    missing = required_cols - set(sensors_df.columns)
+    if missing:
+        print(f"Missing required columns in sensors CSV: {sorted(missing)}")
+        sys.exit(1)
+
+    for _, row in sensors_df.iterrows():
+        street = str(row["street"]).strip()
+
+        street_slug = slugify(street)
+
+        delete_model(f"air_quality_xgboost_model_{street_slug}")
+        delete_feature_view(f"air_quality_fv_{street_slug}")
+        for feature_group in [
+            f"air_quality_{street_slug}",
+            f"weather_{street_slug}",
+            f"air_quality_fv_1_logging_transformed_{street_slug}",
+            f"air_quality_fv_1_logging_untransformed_{street_slug}",
+            f"aq_predictions_{street_slug}"
+        ]:
+            delete_feature_group(feature_group)
 
 elif files_to_clean == "titanic":
     delete_model("titanic")

@@ -63,7 +63,7 @@ def train_one_sensor(city: str, street: str) -> None:
     aq_fg = fs.get_feature_group(name=f"air_quality_{street_slug}", version=1)
     wx_fg = fs.get_feature_group(name=f"weather_{street_slug}", version=1)
 
-    selected = aq_fg.select(["pm25", "date"]).join(wx_fg.select_features(), on=["city"])
+    selected = aq_fg.select(["pm25", "date", "pm25_lag_1", "pm25_lag_2", "pm25_lag_3"]).join(wx_fg.select_features(), on=["city"])
     fv = fs.get_or_create_feature_view(
         name=f"air_quality_fv_{street_slug}",
         description=f"Features for {city}/{street}",
