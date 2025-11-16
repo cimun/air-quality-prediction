@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Air Quality Dashboard</title>
+
+  <!-- Link your CSS file -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="title-block">
+        <h1>
+          <span class="title-pill">Air Quality</span>
+          Forecast & Hindcast
+        </h1>
+        <p class="subtitle">
+          Daily PM2.5 forecasts and hindcasts for selected sensors.
+        </p>
+      </div>
+
+      <div class="controls">
+        <span class="sensor-label">Sensor</span>
+        <select id="sensor"></select>
+        <span id="status"></span>
+      </div>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <div class="card-header">
+          <h2><span class="emoji">📈</span> Forecast</h2>
+          <span class="badge">Next days</span>
+        </div>
+        <div class="imgwrap">
+          <img id="forecast" alt="Forecast PNG" />
+        </div>
+        <p class="hint">Model PM2.5 forecast for upcoming days.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-header">
+          <h2><span class="emoji">🔁</span> Hindcast (1-day)</h2>
+          <span class="badge">Backtest</span>
+        </div>
+        <div class="imgwrap">
+          <img id="hindcast" alt="Hindcast PNG" />
+        </div>
+        <p class="hint">Prediction made one day earlier vs observed PM2.5.</p>
+      </article>
+    </section>
+
+    <footer>Images refresh automatically when pipelines run.</footer>
+  </div>
+
+  <script>
+    const SENSORS = [
+      { city: "vienna", street: "schottenfeldgasse", slug: "schottenfeldgasse" },
+      { city: "vienna", street: "webgasse", slug: "webgasse" }
+    ];
+
+    const BASE = "air-quality/assets/img";
+
+    const sel = document.getElementById("sensor");
+    const forecast = document.getElementById("forecast");
+    const hindcast = document.getElementById("hindcast");
+    const status = document.getElementById("status");
+
+    SENSORS.forEach((s, i) => {
+      const opt = document.createElement("option");
+      opt.value = s.slug;
+      opt.textContent = `${s.city} / ${s.street}`;
+      if (i === 0) opt.selected = true;
+      sel.appendChild(opt);
+    });
+
+    function updateImages() {
+      const slug = sel.value;
+      const t = Date.now();
+      forecast.src = `${BASE}/pm25_forecast_${slug}.png?t=${t}`;
+      hindcast.src = `${BASE}/pm25_hindcast_${slug}.png?t=${t}`;
+      const sensor = SENSORS.find(s => s.slug === slug);
+      status.textContent = `${sensor.city} / ${sensor.street}`;
+    }
+
+    sel.addEventListener("change", updateImages);
+    updateImages();
+  </script>
+</body>
+</html>
