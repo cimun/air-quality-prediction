@@ -117,7 +117,6 @@ def run_inference_for_sensor(city: str, street: str) -> None:
             float(row.get("surface_pressure_mean")),
             float(row.get("relative_humidity_2m_mean")),
             float(row.get("cloud_cover_mean")),
-            float(row.get("visibility_mean")),
         ]
         pred = xgb_model.predict([features])[0]
         # Set lag columns for the current row (the values used for this prediction)
@@ -131,6 +130,8 @@ def run_inference_for_sensor(city: str, street: str) -> None:
     batch_df["country"] = batch_df.get("country", city)
     batch_df["days_before_forecast_day"] = range(1, len(batch_df) + 1)
     batch_df = batch_df.sort_values(by=["date"])
+
+    print(batch_df.head())
 
     # ----- Save prediction chart -----
     docs_dir = root_dir / "docs" / "air-quality" / "assets" / "img"

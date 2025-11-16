@@ -34,7 +34,7 @@ def get_historical_weather(city, start_date,  end_date, latitude, longitude):
         "start_date": start_date,
         "end_date": end_date,
         "daily": ["temperature_2m_mean", "precipitation_sum", "wind_speed_10m_max", "wind_direction_10m_dominant",
-                  "surface_pressure_mean", "relative_humidity_2m_mean", "cloud_cover_mean", "visibility_mean"]
+                  "surface_pressure_mean", "relative_humidity_2m_mean", "cloud_cover_mean"]
     }
     responses = openmeteo.weather_api(url, params=params)
 
@@ -54,7 +54,6 @@ def get_historical_weather(city, start_date,  end_date, latitude, longitude):
     daily_surface_pressure_mean = daily.Variables(4).ValuesAsNumpy()
     daily_relative_humidity_2m_mean = daily.Variables(5).ValuesAsNumpy()
     daily_cloud_cover_mean = daily.Variables(6).ValuesAsNumpy()
-    daily_visibility_mean = daily.Variables(7).ValuesAsNumpy()
 
     daily_data = {"date": pd.date_range(
         start = pd.to_datetime(daily.Time(), unit = "s"),
@@ -69,7 +68,6 @@ def get_historical_weather(city, start_date,  end_date, latitude, longitude):
     daily_data["surface_pressure_mean"] = daily_surface_pressure_mean
     daily_data["relative_humidity_2m_mean"] = daily_relative_humidity_2m_mean
     daily_data["cloud_cover_mean"] = daily_cloud_cover_mean
-    daily_data["visibility_mean"] = daily_visibility_mean
 
     daily_dataframe = pd.DataFrame(data = daily_data)
     daily_dataframe = daily_dataframe.dropna()
@@ -92,7 +90,7 @@ def get_hourly_weather_forecast(city, latitude, longitude):
         "latitude": latitude,
         "longitude": longitude,
         "hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m", "surface_pressure",
-                   "relative_humidity_2m", "cloud_cover", "visibility"]
+                   "relative_humidity_2m", "cloud_cover"]
     }
     responses = openmeteo.weather_api(url, params=params)
 
@@ -113,7 +111,6 @@ def get_hourly_weather_forecast(city, latitude, longitude):
     hourly_surface_pressure = hourly.Variables(4).ValuesAsNumpy()
     hourly_relative_humidity_2m = hourly.Variables(5).ValuesAsNumpy()
     hourly_cloud_cover = hourly.Variables(6).ValuesAsNumpy()
-    hourly_visibility = hourly.Variables(7).ValuesAsNumpy()
 
     hourly_data = {"date": pd.date_range(
         start = pd.to_datetime(hourly.Time(), unit = "s"),
@@ -128,7 +125,6 @@ def get_hourly_weather_forecast(city, latitude, longitude):
     hourly_data["surface_pressure_mean"] = hourly_surface_pressure
     hourly_data["relative_humidity_2m_mean"] = hourly_relative_humidity_2m
     hourly_data["cloud_cover_mean"] = hourly_cloud_cover
-    hourly_data["visibility_mean"] = hourly_visibility
 
     hourly_dataframe = pd.DataFrame(data = hourly_data)
     hourly_dataframe = hourly_dataframe.dropna()
@@ -312,8 +308,9 @@ def backfill_predictions_for_monitoring(weather_fg, air_quality_df, monitor_fg, 
     features_df = features_df.sort_values(by=['date'], ascending=True)
     features_df = features_df.tail(10)
     features_df = pd.merge(features_df, air_quality_df[['date', 'pm25_lag_1', 'pm25_lag_2', 'pm25_lag_3']], on="date")
-    print(features_df.head(10))
-    features_df['predicted_pm25'] = model.predict(features_df[['pm25_lag_1', 'pm25_lag_2', 'pm25_lag_3', 'temperature_2m_mean', 'precipitation_sum', 'wind_speed_10m_max', 'wind_direction_10m_dominant']])
+    features_df['predicted_pm25'] = model.predict(features_df[['pm25_lag_1', 'pm25_lag_2', 'pm25_lag_3',
+                                        'temperature_2m_mean', 'precipitation_sum', 'wind_speed_10m_max',
+                                        'wind_direction_10m_dominant', 'surface_pressure_mean', 'relative_humidity_2m_mean', 'cloud_cover_mean']])
     df = pd.merge(features_df, air_quality_df[['date','pm25','street','country']], on="date")
     df["predicted_pm25"] = df["predicted_pm25"].astype(np.double)
     df['days_before_forecast_day'] = 1
