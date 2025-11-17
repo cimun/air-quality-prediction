@@ -1,5 +1,5 @@
 AQICN_URL,country,city,street,latitude,longitude
-https://api.waqi.info/feed/A54787/,austria,salzburg,johannes-filzer-strasse,47.79285104593495,13.066328969063019
+https://api.waqi.info/feed/A54787/,austria,salzburg,johannes_filzer_strasse,47.79285104593495,13.066328969063019
 https://api.waqi.info/feed/A247996/,austria,salzburg,drosserweg,47.79209482112637,12.959817942460251
-https://api.waqi.info/feed/A61492/,austria,salzburg,marie-andessner-platz,47.80998993349187,13.021947641780981
+https://api.waqi.info/feed/A61492/,austria,salzburg,marie_andessner_platz,47.80998993349187,13.021947641780981
 https://api.waqi.info/feed/A57415/,austria,salzburg,hallwang,47.84146875956816,13.09385359746093
