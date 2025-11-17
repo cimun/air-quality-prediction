@@ -101,11 +101,12 @@ def train_one_sensor(city: str, street: str) -> None:
 
     hindcast_path = img_dir / "pm25_hindcast.png"
     plt = util.plot_air_quality_forecast(city, street, df, str(hindcast_path), hindcast=True)
-    #plt.show()
+
+    # create new plot for feature importance
+    plt.figure()
 
     plot_importance(model)
     plt.savefig(img_dir / "feature_importance.png")
-    #plt.show()
 
     model.save_model(str(out_dir / "model.json"))
     metrics = {"MSE": str(mse), "R squared": str(r2)}
