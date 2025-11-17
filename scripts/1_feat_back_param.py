@@ -101,6 +101,9 @@ def process_sensor(row: pd.Series, aq_api_key: str, today: date) -> None:
     df = pd.read_csv(aq_csv, parse_dates=["date"], skipinitialspace=True)
 
     df_aq = df[["date", "pm25"]].copy()
+
+    df_aq["pm25"] = df_aq["pm25"] * 4.2
+
     df_aq["pm25"] = df_aq["pm25"].astype("float32")
     df_aq["country"] = country
     df_aq["city"] = city
