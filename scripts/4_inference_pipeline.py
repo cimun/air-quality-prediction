@@ -64,7 +64,7 @@ def get_sensor_rows(sensors_csv: str) -> pd.DataFrame:
         raise ValueError(f"Missing columns in sensors CSV: {sorted(missing)}")
     return df
 
-def run_inference_for_sensor(city: str, street: str) -> None:
+def run_inference_for_sensor(country: str, city: str, street: str) -> None:
     """Run batch inference for one sensor, store results and upload PNGs."""
     street_slug = slugify(street)
     today = datetime.now()
@@ -127,7 +127,7 @@ def run_inference_for_sensor(city: str, street: str) -> None:
 
     batch_df["street"] = street
     batch_df["city"] = city
-    batch_df["country"] = batch_df.get("country", city)
+    batch_df["country"] = country
     batch_df["days_before_forecast_day"] = range(1, len(batch_df) + 1)
     batch_df = batch_df.sort_values(by=["date"])
 
@@ -191,8 +191,9 @@ def main():
     for _, row in sensors.iterrows():
         city = row["city"].strip()
         street = row["street"].strip()
+        country = row["country"].strip()
         try:
-            run_inference_for_sensor(city, street)
+            run_inference_for_sensor(country, city, street)
         except Exception as e:
             print(f"! Error processing {city} / {street}: {e}")
 
