@@ -31,3 +31,17 @@
 
 - The model also includes extra meteorological features such as `surface_pressure`, `relative_humidity` and
   `cloud_cover`. These additions lead to further measurable improvements.
+
+## Model Comparison
+
+![Basic_model](comparison/basic_model.png)
+
+*Basic default Model: MSE=43.4760 R2=\-0.0869*
+
+![Lagged_pm25_model](comparison/lagged_model.png)
+
+*Basic model extended with lagged pm2.5 features: MSE=22.5421 R2=0.4365*
+
+![extended_weather_features_model](comparison/weather_extended.png)
+
+*Lagged model extended with further weather features: MSE=22.4638 R2=0.4384*
