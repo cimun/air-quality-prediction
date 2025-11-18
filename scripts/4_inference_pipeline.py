@@ -102,7 +102,6 @@ def run_inference_for_sensor(city: str, street: str) -> None:
     batch_df["pm25_lag_3"] = float(0.0)
 
     for idx, row in batch_df.iterrows():
-        print(f"Predicting for {row['date'].date()} with lags: {lag_1}, {lag_2}, {lag_3}")
         batch_df.at[idx, "pm25_lag_1"] = lag_1
         batch_df.at[idx, "pm25_lag_2"] = lag_2
         batch_df.at[idx, "pm25_lag_3"] = lag_3

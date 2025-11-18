@@ -16,6 +16,7 @@ from retry_requests import retry
 import hopsworks
 import hsfs
 from pathlib import Path
+import matplotlib.dates as mdates
 
 def get_historical_weather(city, start_date,  end_date, latitude, longitude):
     # latitude, longitude = get_city_coordinates(city)
@@ -204,6 +205,10 @@ def plot_air_quality_forecast(city: str, street: str, df: pd.DataFrame, file_pat
     day = pd.to_datetime(df['date']).dt.date
     # Plot each column separately in matplotlib
     ax.plot(day, df['predicted_pm25'], label='Predicted PM2.5', color='red', linewidth=2, marker='o', markersize=5, markerfacecolor='blue')
+
+    num_ticks_interval = max(1, int(np.ceil(len(day) / 10)))
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=num_ticks_interval))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 
     # Set the y-axis to a logarithmic scale
     ax.set_yscale('log')
