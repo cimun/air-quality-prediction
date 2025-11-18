@@ -29,8 +29,11 @@
 - Evaluation shows clear gains for short term forecasts. Long term performance dips in some cases, but hindcast analyses
   confirm the improvement on short horizons.
 
-- The model also includes extra meteorological features such as `surface_pressure`, `relative_humidity` and
-  `cloud_cover`. These additions lead to further measurable improvements.
+- The lagged model was further extended by extra meteorological features such as `surface_pressure`, `relative_humidity` and
+  `cloud_cover`.
+
+- The comparison below shows that each extension improved the model performance on the test set. While the addition of lagged
+  PM2.5 features had the largest impact, the further weather features also contributed to a small but measurable gain.
 
 ## Model Comparison
 
